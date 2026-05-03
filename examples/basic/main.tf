@@ -33,7 +33,7 @@ resource "proxmox_virtual_environment_download_file" "debian12" {
   node_name    = var.proxmox_node
   content_type = "vztmpl"
   datastore_id = "local"
-  url          = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
+  url          = var.debian_template_url
 }
 
 # ---------------------------------------------------------------------------

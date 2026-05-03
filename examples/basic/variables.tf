@@ -19,3 +19,13 @@ variable "ssh_public_key" {
   description = "SSH public key to install in the container for root access."
   type        = string
 }
+
+variable "debian_template_url" {
+  description = <<-EOT
+    URL of the Debian LXC template to download.
+    Find current URLs at: https://images.linuxcontainers.org/images/debian/
+    or on your Proxmox node: pveam update && pveam available --section system | grep debian
+  EOT
+  type    = string
+  default = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
+}

@@ -4,6 +4,7 @@
 *.tfstate.*
 *.tfvars
 *.tfvars.json
+*.tfvars.local
 crash.log
 override.tf
 override.tf.json

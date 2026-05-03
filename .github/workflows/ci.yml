@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    name: fmt + validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.x"
+
+      - name: tofu fmt
+        run: tofu fmt -check -recursive
+
+      - name: tofu init (module root)
+        run: tofu init -backend=false
+
+      - name: tofu validate (module root)
+        run: tofu validate
+
+      - name: tofu init (example)
+        run: tofu init -backend=false
+        working-directory: examples/basic
+
+      - name: tofu validate (example)
+        run: tofu validate
+        working-directory: examples/basic

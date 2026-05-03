@@ -71,12 +71,16 @@ variable "ip_address" {
 }
 
 variable "gateway" {
-  description = "Default gateway IP. Required when ip_address is not \"dhcp\"."
+  description = "Default gateway IP. Required when ip_address is not \"dhcp\". Ignored when ip_address is \"dhcp\"."
   type        = string
   default     = ""
   validation {
     condition     = var.ip_address == "dhcp" || var.gateway != ""
     error_message = "gateway is required when ip_address is a static IP."
+  }
+  validation {
+    condition     = !(var.ip_address == "dhcp" && var.gateway != "")
+    error_message = "gateway must be empty when ip_address is \"dhcp\" — it will be ignored otherwise."
   }
 }
 

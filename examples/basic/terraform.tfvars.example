@@ -4,4 +4,8 @@
 proxmox_host      = "192.168.1.100"          # your Proxmox node IP
 proxmox_node      = "pve"                    # node name shown in the Proxmox UI sidebar
 proxmox_api_token = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-ssh_public_key    = "ssh-ed25519 AAAA... you@host"
+ssh_public_key    = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA..."   # run: cat ~/.ssh/id_ed25519.pub
+
+# Optional: update this URL if a newer Debian template is available.
+# Find current URLs: pveam update && pveam available --section system | grep debian
+# debian_template_url = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"

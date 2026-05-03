@@ -42,7 +42,9 @@ Before running `terraform apply`, make sure you have:
 - [ ] **Proxmox VE 7.x or 8.x** — tested on PVE 8.x
 - [ ] **API token** configured on your Proxmox node (see below) — or `root@pam` credentials
 - [ ] **SSH public key** available locally (`cat ~/.ssh/id_ed25519.pub`)
-- [ ] **`pct` access** — the SSH bootstrap provisioner uses `pct exec`. Either run Terraform directly on your Proxmox node, or set `proxmox_ssh_host` so the provisioner connects via SSH (see [Running from a remote machine](#running-from-a-remote-machine))
+- [ ] **`pct` access for SSH bootstrap** — two options:
+  - **Simple:** run Terraform directly on your Proxmox node (`ssh root@<proxmox-ip>` then run `tofu apply` there)
+  - **Remote:** run Terraform on your laptop and set `proxmox_ssh_host = "<proxmox-ip>"` in your module call. This requires passwordless SSH from your machine to `root@<proxmox-ip>`. Set it up once: `ssh-copy-id root@<proxmox-ip>`
 
 ---
 
@@ -235,10 +237,12 @@ The `mount_points` variable and `lifecycle { ignore_changes = [mount_point] }` i
 → Set `insecure = true` in the provider block (Proxmox uses a self-signed cert by default).
 
 **SSH bootstrap fails / Ansible can't connect after apply**
-→ The `pct exec` provisioner may have timed out. Run manually on the Proxmox host:
+→ If `proxmox_ssh_host` is set: ensure passwordless SSH works first: `ssh root@<proxmox-ip> "pct list"`.
+→ Install SSH manually on the Proxmox host:
 ```bash
 pct exec <vm_id> -- apt-get install -y openssh-server && pct exec <vm_id> -- systemctl start ssh
 ```
+→ After manual fix, run `terraform apply` again — the container is tainted after a provisioner failure and will be replaced. This is expected Terraform behaviour.
 
 **Template download is slow / times out**
 → The first `terraform apply` downloads the Debian 12 template (~200 MB). This can take several minutes depending on your internet connection. It is cached by Proxmox for subsequent applies.
