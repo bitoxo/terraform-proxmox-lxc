@@ -1,8 +1,17 @@
-# Define all your containers here.
-# Add a new container by adding a new entry — no HCL changes needed.
+# All containers are defined here.
+# To add a new container: add an entry below, run terraform apply. No HCL changes needed.
 #
-# Required per container: vm_id, ip_address
-# All other fields are optional and fall back to the module defaults.
+# Required fields:  vm_id, ip_address
+# Everything else falls back to the default in terraform.tfvars or the module default.
+#
+# Per-container overrides (all optional):
+#   cpu_cores, memory, disk_size, storage
+#   gateway, dns_servers, bridge, vlan_tag
+#   os_type (debian | ubuntu | alpine | unmanaged)
+#   nesting, unprivileged, start_on_boot, started, protection
+#   pool_id, tags, description
+#   mount_features (e.g. [nfs])
+#   mount_points (see README — managed via pct set, not API)
 
 jellyfin:
   vm_id:      300
@@ -16,13 +25,15 @@ jellyfin:
 navidrome:
   vm_id:      301
   ip_address: "192.168.1.151/24"
+  memory:     256
+  nesting:    false   # no Docker needed, save overhead
   tags:       [music]
 
 vaultwarden:
   vm_id:      302
   ip_address: "192.168.1.152/24"
   memory:     256
-  protection: true   # prevent accidental deletion
+  protection: true    # prevent accidental deletion
   tags:       [security]
 
 immich:
@@ -32,3 +43,4 @@ immich:
   memory:     4096
   disk_size:  16
   tags:       [photos]
+  mount_features: [nfs]  # enable NFS mounts inside the container

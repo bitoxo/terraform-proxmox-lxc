@@ -20,7 +20,37 @@ variable "ssh_public_key" {
   type        = string
 }
 
-variable "debian_template_url" {
+variable "vm_id" {
+  description = "Container ID (CTID). Must be unique on your Proxmox node."
+  type        = number
+  default     = 300
+}
+
+variable "ip_address" {
+  description = "Static IP with prefix length (e.g. \"192.168.1.100/24\") or \"dhcp\"."
+  type        = string
+  default     = "dhcp"
+}
+
+variable "gateway" {
+  description = "Default gateway. Required when ip_address is a static IP."
+  type        = string
+  default     = ""
+}
+
+variable "dns_servers" {
+  description = "DNS server IPs."
+  type        = list(string)
+  default     = ["8.8.8.8", "8.8.4.4"]
+}
+
+variable "storage" {
+  description = "Datastore for the container root disk (e.g. \"local\", \"local-lvm\", \"local-zfs\")."
+  type        = string
+  default     = "local-lvm"
+}
+
+variable "template_url" {
   description = <<-EOT
     URL of the Debian LXC template to download.
     Find current URLs at: https://images.linuxcontainers.org/images/debian/
@@ -28,4 +58,10 @@ variable "debian_template_url" {
   EOT
   type        = string
   default     = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
+}
+
+variable "template_datastore_id" {
+  description = "Datastore where the LXC template is stored (e.g. \"local\", \"local-zfs\"). Must support the \"vztmpl\" content type."
+  type        = string
+  default     = "local"
 }

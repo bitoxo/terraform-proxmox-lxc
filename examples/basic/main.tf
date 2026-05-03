@@ -11,11 +11,9 @@ terraform {
 # Provider authentication
 #
 # Option A — API token (recommended, least privilege)
-#   Create a token in Proxmox UI: Datacenter → Permissions → API Tokens
-#   Required token privileges: VM.Allocate, VM.Config.*, Datastore.AllocateSpace,
-#   Sys.Exec (for pct exec, or run Terraform directly on the Proxmox node)
+#   Run: ./scripts/setup-proxmox-token.sh <proxmox-ip>
 #
-# Option B — root@pam (simpler, but full admin access)
+# Option B — root@pam (simpler, full admin access)
 #   Replace api_token with: username = "root@pam" / password = var.proxmox_password
 # ---------------------------------------------------------------------------
 provider "proxmox" {
@@ -25,44 +23,45 @@ provider "proxmox" {
 }
 
 # ---------------------------------------------------------------------------
-# Download the Debian 12 template once.
-# This takes several minutes on first apply (the tarball is ~200 MB).
-# On subsequent applies Proxmox skips the download if the file already exists.
+# Download the LXC template once.
+# This takes several minutes on first apply (~200 MB tarball).
+# Proxmox skips the download on subsequent applies if the file already exists.
 # ---------------------------------------------------------------------------
-resource "proxmox_virtual_environment_download_file" "debian12" {
+resource "proxmox_virtual_environment_download_file" "template" {
   node_name    = var.proxmox_node
   content_type = "vztmpl"
-  datastore_id = "local"
-  url          = var.debian_template_url
+  datastore_id = var.template_datastore_id
+  url          = var.template_url
 }
 
 # ---------------------------------------------------------------------------
 # Create a single LXC container using the module.
+# All values come from terraform.tfvars — no edits to this file needed.
 # ---------------------------------------------------------------------------
 module "jellyfin" {
   source = "../.."
 
   node_name        = var.proxmox_node
-  vm_id            = 300
+  vm_id            = var.vm_id
   hostname         = "jellyfin"
-  template_file_id = proxmox_virtual_environment_download_file.debian12.id
+  template_file_id = proxmox_virtual_environment_download_file.template.id
 
   cpu_cores = 2
   memory    = 2048
   disk_size = 8
-  storage   = "local-lvm"
+  storage   = var.storage
 
-  ip_address      = "192.168.1.150/24"
-  gateway         = "192.168.1.1"
-  dns_servers     = ["192.168.1.1"]
+  ip_address      = var.ip_address
+  gateway         = var.gateway
+  dns_servers     = var.dns_servers
   ssh_public_keys = [var.ssh_public_key]
 
   tags        = ["media"]
-  description = "# Jellyfin\n\n<a href=\"http://192.168.1.150:8096\" target=\"_blank\">http://192.168.1.150:8096</a>"
+  description = "# Jellyfin\n\n<a href=\"http://${split("/", var.ip_address)[0]}:8096\" target=\"_blank\">Open Jellyfin</a>"
   nesting     = true # required for Docker-in-LXC
 
   # If you run Terraform from your laptop instead of directly on the Proxmox node,
-  # set this to your Proxmox host IP so the SSH bootstrap provisioner can reach it.
+  # uncomment and set this to your Proxmox host IP.
   # proxmox_ssh_host = var.proxmox_host
 }
 
