@@ -219,6 +219,19 @@ MIT
 ## Contributors
 
 <!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/bitoxo">
+                    <img src="https://avatars.githubusercontent.com/u/155196117?v=4" width="100;" alt="bitoxo"/>
+                    <br />
+                    <sub><b>bitoxo</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: contributors -end -->
 
 ---
