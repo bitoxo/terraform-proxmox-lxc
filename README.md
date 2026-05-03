@@ -47,15 +47,17 @@ terraform apply                               # creates all containers in parall
 
 ## Why this module?
 
-Creating a production-ready LXC container with the `bpg/proxmox` provider requires several non-obvious workarounds. This module handles them for you:
+**The real reasons — not marketing:**
 
-| Problem | What this module does |
-|---|---|
-| Some LXC templates ship without `openssh-server` | Installs and starts SSH automatically via `pct exec` (Debian/Ubuntu + Alpine). Set `bootstrap_ssh = false` if your image already includes it. |
-| API tokens can't set bind-type mount points | Sets `lifecycle { ignore_changes = [mount_point] }` to prevent force-replace |
-| `unprivileged = true` is the right default but not obvious | Enabled by default; disable explicitly if you need privileged mode |
-| `nesting` must be enabled for Docker-in-LXC | Enabled by default |
-| Single DNS server is a common limitation | Accepts a list of DNS servers |
+**YAML-driven scaling.** The homelab example lets you manage every container from a single `containers.yaml`. Adding a new container is two lines. No HCL changes, no copy-pasting resource blocks, no drift between containers.
+
+**One command to get a working API token.** The `setup-proxmox-token.sh` script handles the part that trips up every first-time bpg/proxmox user — creating a token with the right permissions. Most people spend 30 minutes on this.
+
+**Run Terraform from your laptop.** The `proxmox_ssh_host` variable wires up the SSH bootstrap provisioner for remote runs without any changes to the module itself. The provider handles the API; `pct exec` for SSH setup is routed via SSH automatically.
+
+**Input validation that catches real mistakes.** Static IP without a gateway errors immediately at plan time. `vm_id` out of range, invalid VLAN tag — all caught before Proxmox sees the request.
+
+**One known workaround pre-applied.** Bind-type mount points cannot be set via API token — the Proxmox API rejects them. Without `lifecycle { ignore_changes = [mount_point] }`, Terraform force-replaces the container every time you run plan after adding a bind-mount manually. This module sets that for you.
 
 ---
 
