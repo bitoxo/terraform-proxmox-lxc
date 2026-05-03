@@ -4,7 +4,7 @@ An OpenTofu/Terraform module for creating **unprivileged LXC containers on Proxm
 
 ```hcl
 module "jellyfin" {
-  source = "github.com/your-username/terraform-proxmox-lxc"
+  source = "github.com/bitoxo/terraform-proxmox-lxc"
 
   node_name        = "pve"
   vm_id            = 300
@@ -135,7 +135,7 @@ provider "proxmox" {
 ## Quick start
 
 ```bash
-git clone https://github.com/your-username/terraform-proxmox-lxc
+git clone https://github.com/bitoxo/terraform-proxmox-lxc
 cd terraform-proxmox-lxc/examples/basic
 
 cp terraform.tfvars.example terraform.tfvars
@@ -156,7 +156,7 @@ terraform apply
 
 ```hcl
 module "my_service" {
-  source = "github.com/your-username/terraform-proxmox-lxc"
+  source = "github.com/bitoxo/terraform-proxmox-lxc"
 
   node_name        = "pve"
   vm_id            = 301
@@ -191,7 +191,7 @@ locals {
 
 module "containers" {
   for_each = local.containers
-  source   = "github.com/your-username/terraform-proxmox-lxc"
+  source   = "github.com/bitoxo/terraform-proxmox-lxc"
 
   node_name        = "pve"
   vm_id            = each.value.vm_id
@@ -327,3 +327,16 @@ pct exec <vm_id> -- apt-get install -y openssh-server && pct exec <vm_id> -- sys
 ## License
 
 MIT
+
+---
+
+## AI Disclosure
+
+This module was designed and developed with the assistance of [Claude](https://claude.ai) (Anthropic). AI was used throughout the process:
+
+- Architecture and module design decisions
+- Code generation and review (HCL, Bash)
+- Documentation and README copy
+- Multi-round review for usability, correctness, and edge cases
+
+All generated code was reviewed and tested by the author. The module reflects real-world homelab use cases and operational experience with Proxmox VE.
