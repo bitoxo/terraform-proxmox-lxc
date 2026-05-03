@@ -51,7 +51,7 @@ Creating a production-ready LXC container with the `bpg/proxmox` provider requir
 
 | Problem | What this module does |
 |---|---|
-| Debian 12 templates ship without `openssh-server` | Installs and starts it automatically via `pct exec`, with retry logic |
+| Some LXC templates ship without `openssh-server` | Installs and starts SSH automatically via `pct exec` (Debian/Ubuntu + Alpine). Set `bootstrap_ssh = false` if your image already includes it. |
 | API tokens can't set bind-type mount points | Sets `lifecycle { ignore_changes = [mount_point] }` to prevent force-replace |
 | `unprivileged = true` is the right default but not obvious | Enabled by default; disable explicitly if you need privileged mode |
 | `nesting` must be enabled for Docker-in-LXC | Enabled by default |
@@ -267,8 +267,9 @@ The `mount_points` variable and `lifecycle { ignore_changes = [mount_point] }` i
 | `pool_id` | Resource pool to assign container to | `string` | `""` | no |
 | `vlan_tag` | VLAN tag (0 = disabled) | `number` | `0` | no |
 | `mount_features` | Extra mount features (e.g. `["nfs"]`) | `list(string)` | `[]` | no |
-| `mount_points` | Bind-mount definitions (lifecycle-ignored) | `list(object)` | `[]` | no |
+| `mount_points` | Bind-mount definitions (not applied by Terraform — see Bind-mounts) | `list(object)` | `[]` | no |
 | `proxmox_ssh_host` | Proxmox host IP for remote SSH bootstrap | `string` | `""` | no |
+| `bootstrap_ssh` | Install+start SSH after creation (set false if image already has SSH) | `bool` | `true` | no |
 
 ## Outputs
 
@@ -295,16 +296,23 @@ The `mount_points` variable and `lifecycle { ignore_changes = [mount_point] }` i
 ```bash
 pct exec <vm_id> -- apt-get install -y openssh-server && pct exec <vm_id> -- systemctl start ssh
 ```
-→ After manual fix, run `terraform apply` again — the container is tainted after a provisioner failure and will be replaced. This is expected Terraform behaviour.
+→ After a provisioner failure, the container is **tainted** — `terraform apply` will **destroy and recreate it**. This is expected Terraform behavior. Make sure your data is not in the container before re-applying.
+→ If your template already ships with SSH, set `bootstrap_ssh = false` to skip the provisioner entirely.
 
 **Template download is slow / times out**
-→ The first `terraform apply` downloads the Debian 12 template (~200 MB). This can take several minutes depending on your internet connection. It is cached by Proxmox for subsequent applies.
+→ The first `terraform apply` downloads the LXC template (~100–200 MB). This can take several minutes. It is cached by Proxmox for subsequent applies.
 
 **`Error: gateway is required when ip_address is a static IP`**
 → You set a static `ip_address` but left `gateway` empty. Add `gateway = "192.168.x.1"`.
 
 **Containers show mount drift in `terraform plan`**
 → Expected. Bind-mounts are managed externally (via `pct set`) and are intentionally ignored in the Terraform lifecycle. This is not a bug.
+
+**Using Terraform Cloud or a remote backend?**
+→ The SSH bootstrap uses a `local-exec` provisioner, which runs on the Terraform runner — not your laptop. In Terraform Cloud, the runner cannot reach your Proxmox node unless you configure a self-hosted agent or a network tunnel. If you use a remote backend, run Terraform locally or via a machine that has network access to Proxmox.
+
+**Proxmox VE version compatibility**
+→ Tested on PVE 8.x. PVE 7.x should work but is untested — API token handling and LXC features are essentially the same. If you hit issues on 7.x, please open an issue.
 
 ---
 

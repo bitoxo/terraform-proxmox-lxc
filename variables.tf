@@ -78,10 +78,6 @@ variable "gateway" {
     condition     = var.ip_address == "dhcp" || var.gateway != ""
     error_message = "gateway is required when ip_address is a static IP."
   }
-  validation {
-    condition     = !(var.ip_address == "dhcp" && var.gateway != "")
-    error_message = "gateway must be empty when ip_address is \"dhcp\" — it will be ignored otherwise."
-  }
 }
 
 variable "bridge" {
@@ -139,9 +135,11 @@ variable "mount_features" {
 
 variable "mount_points" {
   description = <<-EOT
-    Bind-mount point definitions (informational). These are intentionally ignored by Terraform's
-    lifecycle because the Proxmox API does not allow API tokens to set bind-type mounts — they
-    must be configured via `pct set` on the host (e.g. from an Ansible task). See README for details.
+    Bind-mount definitions for documentation purposes only.
+    IMPORTANT: These are NOT applied by Terraform. The Proxmox API does not allow API tokens
+    to configure bind-type mounts. Use `pct set <ctid> --mp0 /host/path,mp=/container/path`
+    on the Proxmox host instead (e.g. from an Ansible task). The lifecycle ignore_changes rule
+    prevents Terraform from force-replacing the container when mounts are managed externally.
   EOT
   type = list(object({
     volume    = string
@@ -170,7 +168,7 @@ variable "protection" {
 }
 
 variable "vlan_tag" {
-  description = "VLAN tag for the network interface. Set to -1 or leave at 0 to disable."
+  description = "VLAN tag for the network interface. Set to 0 to disable (valid range: 1–4094)."
   type        = number
   default     = 0
   validation {
@@ -187,4 +185,10 @@ variable "proxmox_ssh_host" {
   EOT
   type        = string
   default     = ""
+}
+
+variable "bootstrap_ssh" {
+  description = "Install and start openssh-server after container creation. Works on Debian/Ubuntu (apt-get) and Alpine (apk). Set to false if your template already ships with SSH enabled."
+  type        = bool
+  default     = true
 }

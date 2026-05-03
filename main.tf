@@ -9,12 +9,17 @@ terraform {
 }
 
 locals {
-  # If proxmox_ssh_host is set, run pct exec via SSH (for remote Terraform runs).
-  # Otherwise run pct exec directly (Terraform runs on the Proxmox node itself).
+  # Package-manager-agnostic SSH bootstrap: tries apt-get (Debian/Ubuntu) first,
+  # falls back to apk (Alpine). Safe to run on images that already have SSH.
+  _bootstrap_inner = "command -v apt-get && apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh || command -v apk && apk add --no-cache openssh && rc-update add sshd default && rc-service sshd start"
+
+  # If proxmox_ssh_host is set, reach pct via SSH (remote Terraform runs).
+  # Otherwise call pct directly (Terraform runs on the Proxmox node itself).
+  # When bootstrap_ssh is false the inner command is replaced with a no-op.
   ssh_bootstrap_cmd = var.proxmox_ssh_host != "" ? (
-    "ssh -o StrictHostKeyChecking=no root@${var.proxmox_ssh_host} 'pct exec ${var.vm_id} -- bash -c \"apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh\"'"
+    "ssh -o StrictHostKeyChecking=no root@${var.proxmox_ssh_host} 'pct exec ${var.vm_id} -- sh -c \"${var.bootstrap_ssh ? local._bootstrap_inner : "true"}\"'"
     ) : (
-    "pct exec ${var.vm_id} -- bash -c 'apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh'"
+    "pct exec ${var.vm_id} -- sh -c '${var.bootstrap_ssh ? local._bootstrap_inner : "true"}'"
   )
 }
 
@@ -94,17 +99,17 @@ resource "proxmox_virtual_environment_container" "this" {
     ignore_changes = [mount_point]
   }
 
-  # Debian 12 (and most standard LXC templates) ship without openssh-server.
-  # This provisioner installs it so the container is immediately reachable via SSH.
-  # Retries up to 10 times (30s total) to handle slow container initialization.
+  # Installs and starts SSH if not already present (skipped when bootstrap_ssh = false).
+  # Retries up to 20 times (60s total) to handle slow container initialization.
+  # On persistent failure the container is tainted and will be replaced on next apply.
   provisioner "local-exec" {
     command = <<-EOT
-      for i in $(seq 1 10); do
+      for i in $(seq 1 20); do
         ${local.ssh_bootstrap_cmd} && echo "SSH bootstrap succeeded." && exit 0
-        echo "Attempt $i/10 failed, retrying in 3s..."
+        echo "Attempt $i/20 failed, retrying in 3s..."
         sleep 3
       done
-      echo "ERROR: SSH bootstrap failed after 10 attempts."
+      echo "ERROR: SSH bootstrap failed after 20 attempts."
       echo "Manual fix: pct exec ${var.vm_id} -- apt-get install -y openssh-server"
       exit 1
     EOT
