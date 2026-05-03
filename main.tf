@@ -13,18 +13,18 @@ locals {
   # Otherwise run pct exec directly (Terraform runs on the Proxmox node itself).
   ssh_bootstrap_cmd = var.proxmox_ssh_host != "" ? (
     "ssh -o StrictHostKeyChecking=no root@${var.proxmox_ssh_host} 'pct exec ${var.vm_id} -- bash -c \"apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh\"'"
-  ) : (
+    ) : (
     "pct exec ${var.vm_id} -- bash -c 'apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh'"
   )
 }
 
 resource "proxmox_virtual_environment_container" "this" {
-  node_name    = var.node_name
-  vm_id        = var.vm_id
-  description  = var.description != "" ? var.description : var.hostname
-  tags         = var.tags
-  pool_id      = var.pool_id != "" ? var.pool_id : null
-  protection   = var.protection
+  node_name   = var.node_name
+  vm_id       = var.vm_id
+  description = var.description != "" ? var.description : var.hostname
+  tags        = var.tags
+  pool_id     = var.pool_id != "" ? var.pool_id : null
+  protection  = var.protection
 
   start_on_boot = var.start_on_boot
   started       = var.started

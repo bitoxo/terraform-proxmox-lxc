@@ -21,7 +21,7 @@ terraform {
 provider "proxmox" {
   endpoint  = "https://${var.proxmox_host}:8006"
   api_token = var.proxmox_api_token
-  insecure  = true   # set false if your Proxmox node has a valid TLS certificate
+  insecure  = true # set false if your Proxmox node has a valid TLS certificate
 }
 
 # ---------------------------------------------------------------------------
@@ -47,10 +47,10 @@ module "jellyfin" {
   hostname         = "jellyfin"
   template_file_id = proxmox_virtual_environment_download_file.debian12.id
 
-  cpu_cores  = 2
-  memory     = 2048
-  disk_size  = 8
-  storage    = "local-lvm"
+  cpu_cores = 2
+  memory    = 2048
+  disk_size = 8
+  storage   = "local-lvm"
 
   ip_address      = "192.168.1.150/24"
   gateway         = "192.168.1.1"
@@ -59,7 +59,7 @@ module "jellyfin" {
 
   tags        = ["media"]
   description = "# Jellyfin\n\n<a href=\"http://192.168.1.150:8096\" target=\"_blank\">http://192.168.1.150:8096</a>"
-  nesting     = true   # required for Docker-in-LXC
+  nesting     = true # required for Docker-in-LXC
 
   # If you run Terraform from your laptop instead of directly on the Proxmox node,
   # set this to your Proxmox host IP so the SSH bootstrap provisioner can reach it.

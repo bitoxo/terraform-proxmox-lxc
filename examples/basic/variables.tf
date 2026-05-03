@@ -26,6 +26,6 @@ variable "debian_template_url" {
     Find current URLs at: https://images.linuxcontainers.org/images/debian/
     or on your Proxmox node: pveam update && pveam available --section system | grep debian
   EOT
-  type    = string
-  default = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
+  type        = string
+  default     = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
 }

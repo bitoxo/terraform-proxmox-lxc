@@ -77,15 +77,28 @@ Before running `terraform apply`, make sure you have:
 
 ### Option A — API token (recommended)
 
-Create a dedicated token in the Proxmox UI:
+The easiest way is the included setup script — it SSHs to your Proxmox node and creates the token for you:
 
-1. **Datacenter → Permissions → API Tokens → Add**
-   - User: `root@pam` (or a dedicated user)
-   - Token ID: `terraform`
-   - Uncheck "Privilege Separation" for simplest setup
-2. Copy the displayed secret — it's shown only once
-3. Grant the token the following permissions on `/` (Datacenter → Permissions → Add → API Token Permission):
-   - `VM.Allocate`, `VM.Clone`, `VM.Config.CDROM`, `VM.Config.CPU`, `VM.Config.Disk`, `VM.Config.HWType`, `VM.Config.Memory`, `VM.Config.Network`, `VM.Config.Options`, `VM.PowerMgmt`, `Datastore.AllocateSpace`, `Datastore.AllocateTemplate`, `Datastore.Audit`, `Sys.Audit`, `Sys.Exec`
+```bash
+./scripts/setup-proxmox-token.sh 192.168.1.100
+```
+
+Output:
+```
+✓ Token created: root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Add to your terraform.tfvars:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  proxmox_host      = "192.168.1.100"
+  proxmox_api_token = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  ssh_public_key    = "ssh-ed25519 AAAA..."
+```
+
+**Requirements:** SSH access as `root` to the Proxmox node (i.e. `ssh root@192.168.1.100` works). The script uses `pveum` which ships with Proxmox — no installation needed.
+
+Then use the token in your provider block:
 
 ```hcl
 provider "proxmox" {
@@ -94,6 +107,17 @@ provider "proxmox" {
   insecure  = true  # set false if you have a valid TLS certificate
 }
 ```
+
+<details>
+<summary>Manual token creation (if you prefer the Proxmox UI)</summary>
+
+1. **Datacenter → Permissions → API Tokens → Add**
+   - User: `root@pam`, Token ID: `terraform`, uncheck "Privilege Separation"
+2. Copy the displayed secret — it's shown only once
+3. Grant the token permissions on `/` (Datacenter → Permissions → Add → API Token Permission):
+   `VM.Allocate`, `VM.Clone`, `VM.Config.*`, `VM.PowerMgmt`, `Datastore.AllocateSpace`, `Datastore.AllocateTemplate`, `Datastore.Audit`, `Sys.Audit`, `Sys.Exec`
+
+</details>
 
 ### Option B — root@pam (simpler, full admin access)
 

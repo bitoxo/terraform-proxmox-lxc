@@ -185,6 +185,6 @@ variable "proxmox_ssh_host" {
     Required when Terraform runs on a different machine than the Proxmox host.
     Leave empty if Terraform runs directly on the Proxmox node.
   EOT
-  type    = string
-  default = ""
+  type        = string
+  default     = ""
 }
