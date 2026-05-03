@@ -330,6 +330,14 @@ MIT
 
 ---
 
+## Contributors
+
+<a href="https://github.com/bitoxo/terraform-proxmox-lxc/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=bitoxo/terraform-proxmox-lxc" />
+</a>
+
+---
+
 ## AI Disclosure
 
 This module was designed and developed with the assistance of [Claude](https://claude.ai) (Anthropic). AI was used throughout the process:
