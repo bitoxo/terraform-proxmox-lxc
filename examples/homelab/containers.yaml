@@ -1,0 +1,34 @@
+# Define all your containers here.
+# Add a new container by adding a new entry — no HCL changes needed.
+#
+# Required per container: vm_id, ip_address
+# All other fields are optional and fall back to the module defaults.
+
+jellyfin:
+  vm_id:      300
+  ip_address: "192.168.1.150/24"
+  cpu_cores:  2
+  memory:     2048
+  disk_size:  8
+  tags:       [media]
+  description: "# Jellyfin\n\n<a href='http://192.168.1.150:8096'>http://192.168.1.150:8096</a>"
+
+navidrome:
+  vm_id:      301
+  ip_address: "192.168.1.151/24"
+  tags:       [music]
+
+vaultwarden:
+  vm_id:      302
+  ip_address: "192.168.1.152/24"
+  memory:     256
+  protection: true   # prevent accidental deletion
+  tags:       [security]
+
+immich:
+  vm_id:      303
+  ip_address: "192.168.1.153/24"
+  cpu_cores:  4
+  memory:     4096
+  disk_size:  16
+  tags:       [photos]

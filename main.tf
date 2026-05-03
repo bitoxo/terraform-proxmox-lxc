@@ -23,9 +23,11 @@ resource "proxmox_virtual_environment_container" "this" {
   vm_id        = var.vm_id
   description  = var.description != "" ? var.description : var.hostname
   tags         = var.tags
+  pool_id      = var.pool_id != "" ? var.pool_id : null
+  protection   = var.protection
 
   start_on_boot = var.start_on_boot
-  started       = true
+  started       = var.started
   unprivileged  = var.unprivileged
 
   operating_system {
@@ -66,8 +68,9 @@ resource "proxmox_virtual_environment_container" "this" {
   }
 
   network_interface {
-    name   = "eth0"
-    bridge = var.bridge
+    name    = "eth0"
+    bridge  = var.bridge
+    vlan_id = var.vlan_tag > 0 ? var.vlan_tag : null
   }
 
   features {

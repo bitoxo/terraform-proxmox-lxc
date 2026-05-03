@@ -151,6 +151,34 @@ variable "mount_points" {
   default = []
 }
 
+variable "started" {
+  description = "Whether the container should be running after creation."
+  type        = bool
+  default     = true
+}
+
+variable "pool_id" {
+  description = "Resource pool to assign the container to. Leave empty for no pool."
+  type        = string
+  default     = ""
+}
+
+variable "protection" {
+  description = "Prevent accidental deletion of the container via the Proxmox UI or API."
+  type        = bool
+  default     = false
+}
+
+variable "vlan_tag" {
+  description = "VLAN tag for the network interface. Set to -1 or leave at 0 to disable."
+  type        = number
+  default     = 0
+  validation {
+    condition     = var.vlan_tag >= 0 && var.vlan_tag <= 4094
+    error_message = "vlan_tag must be between 0 (disabled) and 4094."
+  }
+}
+
 variable "proxmox_ssh_host" {
   description = <<-EOT
     SSH address of the Proxmox host used for the SSH bootstrap provisioner (e.g. \"192.168.1.100\").

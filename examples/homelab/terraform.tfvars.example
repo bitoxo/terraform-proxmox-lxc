@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars and fill in your values.
+
+proxmox_host      = "192.168.1.100"
+proxmox_node      = "pve"
+proxmox_api_token = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+ssh_public_key    = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA..."   # cat ~/.ssh/id_ed25519.pub
+gateway           = "192.168.1.1"
+dns_servers       = ["192.168.1.1"]
+storage           = "local-lvm"
+
+# Uncomment if your network uses VLANs:
+# vlan_tag = 10

@@ -20,6 +20,31 @@ module "jellyfin" {
 }
 ```
 
+## Scaling to many containers
+
+For a full homelab with multiple containers, use the [`examples/homelab/`](examples/homelab/) setup. Define all containers in a single YAML file — adding a new container requires no HCL changes:
+
+```yaml
+# containers.yaml — add a line, run terraform apply, done.
+jellyfin:
+  vm_id:     300
+  ip_address: "192.168.1.150/24"
+  cpu_cores:  2
+  memory:     2048
+
+navidrome:
+  vm_id:     301
+  ip_address: "192.168.1.151/24"   # cpu/memory fall back to module defaults
+```
+
+```bash
+cd examples/homelab
+cp terraform.tfvars.example terraform.tfvars  # fill in once
+terraform apply                               # creates all containers in parallel
+```
+
+---
+
 ## Why this module?
 
 Creating a production-ready LXC container with the `bpg/proxmox` provider requires several non-obvious workarounds. This module handles them for you:
@@ -213,6 +238,10 @@ The `mount_points` variable and `lifecycle { ignore_changes = [mount_point] }` i
 | `unprivileged` | Run as unprivileged container | `bool` | `true` | no |
 | `nesting` | Enable nesting (needed for Docker) | `bool` | `true` | no |
 | `start_on_boot` | Start container on host boot | `bool` | `true` | no |
+| `started` | Container running state after create | `bool` | `true` | no |
+| `protection` | Prevent accidental deletion | `bool` | `false` | no |
+| `pool_id` | Resource pool to assign container to | `string` | `""` | no |
+| `vlan_tag` | VLAN tag (0 = disabled) | `number` | `0` | no |
 | `mount_features` | Extra mount features (e.g. `["nfs"]`) | `list(string)` | `[]` | no |
 | `mount_points` | Bind-mount definitions (lifecycle-ignored) | `list(object)` | `[]` | no |
 | `proxmox_ssh_host` | Proxmox host IP for remote SSH bootstrap | `string` | `""` | no |

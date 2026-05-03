@@ -25,10 +25,18 @@ jobs:
       - name: tofu validate (module root)
         run: tofu validate
 
-      - name: tofu init (example)
+      - name: tofu init (examples/basic)
         run: tofu init -backend=false
         working-directory: examples/basic
 
-      - name: tofu validate (example)
+      - name: tofu validate (examples/basic)
         run: tofu validate
         working-directory: examples/basic
+
+      - name: tofu init (examples/homelab)
+        run: tofu init -backend=false
+        working-directory: examples/homelab
+
+      - name: tofu validate (examples/homelab)
+        run: tofu validate
+        working-directory: examples/homelab
