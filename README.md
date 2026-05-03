@@ -218,9 +218,8 @@ MIT
 
 ## Contributors
 
-<a href="https://github.com/bitoxo/terraform-proxmox-lxc/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=bitoxo/terraform-proxmox-lxc" />
-</a>
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
 
 ---
 
