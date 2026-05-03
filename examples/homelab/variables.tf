@@ -56,7 +56,7 @@ variable "template_url" {
     or on your Proxmox node: pveam update && pveam available --section system | grep debian
   EOT
   type        = string
-  default     = "http://download.proxmox.com/images/system/debian-12-standard_12.7-1_amd64.tar.zst"
+  default     = "http://download.proxmox.com/images/system/debian-12-standard_12.12-1_amd64.tar.zst"
 }
 
 variable "template_datastore_id" {

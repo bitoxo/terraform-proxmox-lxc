@@ -33,7 +33,7 @@ TOKEN_OUTPUT=$(ssh root@"${PROXMOX_HOST}" \
   "pveum user token add ${USER} ${TOKEN_ID} --privsep 0 2>&1 || true")
 
 # Extract UUID from output (format: "value │ <uuid>")
-TOKEN_SECRET=$(echo "$TOKEN_OUTPUT" | grep -oP '(?<=│ )[0-9a-f-]{36}' | head -1 || true)
+TOKEN_SECRET=$(echo "$TOKEN_OUTPUT" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1 || true)
 
 if [[ -z "$TOKEN_SECRET" ]]; then
   # Token may already exist — delete and recreate
@@ -41,7 +41,7 @@ if [[ -z "$TOKEN_SECRET" ]]; then
   ssh root@"${PROXMOX_HOST}" "pveum user token remove ${USER} ${TOKEN_ID} 2>/dev/null || true"
   TOKEN_OUTPUT=$(ssh root@"${PROXMOX_HOST}" \
     "pveum user token add ${USER} ${TOKEN_ID} --privsep 0")
-  TOKEN_SECRET=$(echo "$TOKEN_OUTPUT" | grep -oP '(?<=│ )[0-9a-f-]{36}' | head -1)
+  TOKEN_SECRET=$(echo "$TOKEN_OUTPUT" | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -1)
 fi
 
 if [[ -z "$TOKEN_SECRET" ]]; then

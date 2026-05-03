@@ -6,11 +6,12 @@ proxmox_node      = "pve"
 proxmox_api_token = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 ssh_public_key    = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA..."   # run: cat ~/.ssh/id_ed25519.pub
 
-vm_id      = 300
-ip_address = "192.168.1.150/24"
-gateway    = "192.168.1.1"
-dns_servers = ["192.168.1.1"]
-storage    = "local-lvm"
+vm_id             = 300
+ip_address        = "192.168.1.150/24"
+gateway           = "192.168.1.1"
+dns_servers       = ["192.168.1.1"]
+storage           = "local-lvm"
+proxmox_ssh_host  = "192.168.1.100"  # required when running Terraform from your laptop
 
 # Datastore where the LXC template tarball is stored.
 # Must support content type "vztmpl". On most setups this is "local".

@@ -23,10 +23,11 @@ locals {
 }
 
 resource "proxmox_virtual_environment_download_file" "template" {
-  node_name    = var.proxmox_node
-  content_type = "vztmpl"
-  datastore_id = var.template_datastore_id
-  url          = var.template_url
+  node_name           = var.proxmox_node
+  content_type        = "vztmpl"
+  datastore_id        = var.template_datastore_id
+  url                 = var.template_url
+  overwrite_unmanaged = true
 }
 
 module "containers" {

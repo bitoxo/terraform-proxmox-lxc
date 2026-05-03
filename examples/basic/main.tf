@@ -28,10 +28,11 @@ provider "proxmox" {
 # Proxmox skips the download on subsequent applies if the file already exists.
 # ---------------------------------------------------------------------------
 resource "proxmox_virtual_environment_download_file" "template" {
-  node_name    = var.proxmox_node
-  content_type = "vztmpl"
-  datastore_id = var.template_datastore_id
-  url          = var.template_url
+  node_name           = var.proxmox_node
+  content_type        = "vztmpl"
+  datastore_id        = var.template_datastore_id
+  url                 = var.template_url
+  overwrite_unmanaged = true
 }
 
 # ---------------------------------------------------------------------------
@@ -60,9 +61,7 @@ module "jellyfin" {
   description = "# Jellyfin\n\n<a href=\"http://${split("/", var.ip_address)[0]}:8096\" target=\"_blank\">Open Jellyfin</a>"
   nesting     = true # required for Docker-in-LXC
 
-  # If you run Terraform from your laptop instead of directly on the Proxmox node,
-  # uncomment and set this to your Proxmox host IP.
-  # proxmox_ssh_host = var.proxmox_host
+  proxmox_ssh_host = var.proxmox_ssh_host
 }
 
 output "container_ip" {

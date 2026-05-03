@@ -10,8 +10,10 @@ terraform {
 
 locals {
   # Package-manager-agnostic SSH bootstrap: tries apt-get (Debian/Ubuntu) first,
-  # falls back to apk (Alpine). Safe to run on images that already have SSH.
-  _bootstrap_inner = "command -v apt-get && apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh || command -v apk && apk add --no-cache openssh && rc-update add sshd default && rc-service sshd start"
+  # falls back to apk (Alpine). Parentheses ensure the Alpine path only runs when
+  # the apt-get path fails — without them, operator precedence causes apk to run
+  # on Debian too (and fail), making the whole command exit non-zero.
+  _bootstrap_inner = "(command -v apt-get && apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh) || (command -v apk && apk add --no-cache openssh && rc-update add sshd default && rc-service sshd start)"
 
   # If proxmox_ssh_host is set, reach pct via SSH (remote Terraform runs).
   # Otherwise call pct directly (Terraform runs on the Proxmox node itself).
