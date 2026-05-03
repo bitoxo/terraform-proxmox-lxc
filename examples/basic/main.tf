@@ -58,7 +58,7 @@ module "jellyfin" {
   ssh_public_keys = [var.ssh_public_key]
 
   tags        = ["media"]
-  description = "# Jellyfin\n\n<a href=\"http://${split("/", var.ip_address)[0]}:8096\" target=\"_blank\">Open Jellyfin</a>"
+  description = var.ip_address != "dhcp" ? "# Jellyfin\n\n<a href=\"http://${split("/", var.ip_address)[0]}:8096\" target=\"_blank\">Open Jellyfin</a>" : "# Jellyfin"
   nesting     = true # required for Docker-in-LXC
 
   proxmox_ssh_host = var.proxmox_ssh_host

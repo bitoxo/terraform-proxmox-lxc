@@ -67,11 +67,13 @@ tofu apply
 
 # 2. Deploy the basic example
 cd examples/basic
-cp terraform.tfvars.example terraform.tfvars  # fill in host, token, SSH key
+cp terraform.tfvars.example terraform.tfvars  # fill in host, token, SSH key, vm_id, ip, gateway
 tofu init && tofu apply
 ```
 
 First apply downloads the LXC template (~200 MB) — subsequent applies skip this.
+
+> **Running from your laptop?** Set `proxmox_ssh_host = "192.168.1.100"` in `terraform.tfvars`. Without it, the SSH bootstrap provisioner can't reach `pct` on the Proxmox host and will fail.
 
 ---
 
