@@ -17,3 +17,8 @@ output "node_name" {
   description = "Proxmox node the container was created on."
   value       = proxmox_virtual_environment_container.this.node_name
 }
+
+output "ssh_command" {
+  description = "SSH command to connect to the container (only useful with static IP)."
+  value       = var.ip_address != "dhcp" ? "ssh root@${split("/", var.ip_address)[0]}" : "ssh root@<dhcp-assigned-ip>"
+}

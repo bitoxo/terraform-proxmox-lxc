@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored and never committed.
+
+proxmox_host      = "192.168.1.100"          # your Proxmox node IP
+proxmox_node      = "pve"                    # node name shown in the Proxmox UI sidebar
+proxmox_api_token = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+ssh_public_key    = "ssh-ed25519 AAAA... you@host"

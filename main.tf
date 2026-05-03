@@ -8,26 +8,36 @@ terraform {
   required_version = ">= 1.0"
 }
 
+locals {
+  # If proxmox_ssh_host is set, run pct exec via SSH (for remote Terraform runs).
+  # Otherwise run pct exec directly (Terraform runs on the Proxmox node itself).
+  ssh_bootstrap_cmd = var.proxmox_ssh_host != "" ? (
+    "ssh -o StrictHostKeyChecking=no root@${var.proxmox_ssh_host} 'pct exec ${var.vm_id} -- bash -c \"apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh\"'"
+  ) : (
+    "pct exec ${var.vm_id} -- bash -c 'apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh'"
+  )
+}
+
 resource "proxmox_virtual_environment_container" "this" {
   node_name    = var.node_name
   vm_id        = var.vm_id
   description  = var.description != "" ? var.description : var.hostname
   tags         = var.tags
 
-  start_on_boot = true
+  start_on_boot = var.start_on_boot
   started       = true
-  unprivileged  = true
+  unprivileged  = var.unprivileged
 
   operating_system {
     template_file_id = var.template_file_id
-    type             = "debian"
+    type             = var.os_type
   }
 
   initialization {
     hostname = var.hostname
 
     dns {
-      servers = [var.dns_server]
+      servers = var.dns_servers
     }
 
     ip_config {
@@ -74,19 +84,26 @@ resource "proxmox_virtual_environment_container" "this" {
     }
   }
 
-  # Bind-mounts must be set via `pct set` (the API token lacks permission for bind-type mounts).
-  # This prevents Terraform from force-replacing the container on every plan.
+  # Bind-mounts must be managed via `pct set` on the host because the Proxmox API
+  # does not allow API tokens to configure bind-type mount points. This lifecycle
+  # rule prevents Terraform from force-replacing the container due to mount drift.
   lifecycle {
     ignore_changes = [mount_point]
   }
 
-  # Debian 12 cloud templates ship without openssh-server.
-  # This provisioner installs and starts it so Ansible can connect immediately.
+  # Debian 12 (and most standard LXC templates) ship without openssh-server.
+  # This provisioner installs it so the container is immediately reachable via SSH.
+  # Retries up to 10 times (30s total) to handle slow container initialization.
   provisioner "local-exec" {
     command = <<-EOT
-      sleep 5
-      pct exec ${var.vm_id} -- bash -c \
-        "apt-get install -y -q openssh-server && systemctl enable ssh && systemctl start ssh"
+      for i in $(seq 1 10); do
+        ${local.ssh_bootstrap_cmd} && echo "SSH bootstrap succeeded." && exit 0
+        echo "Attempt $i/10 failed, retrying in 3s..."
+        sleep 3
+      done
+      echo "ERROR: SSH bootstrap failed after 10 attempts."
+      echo "Manual fix: pct exec ${var.vm_id} -- apt-get install -y openssh-server"
+      exit 1
     EOT
   }
 }
